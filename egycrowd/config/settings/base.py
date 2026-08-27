@@ -31,13 +31,22 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'apps.accounts',
+    'taggit',
+    'apps.projects',
+    'apps.donations',
+    'apps.interactions',
+    'apps.core',
 ]
+
+AUTH_USER_MODEL = 'accounts.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -114,7 +123,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
+from pathlib import Path
+
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 
 # Email
@@ -123,5 +136,35 @@ STATIC_URL = 'static/'
 MAILERS = {
     'default': {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+    },
+}
+
+JAZZMIN_SETTINGS = {
+    "site_title": "EgyCrowd Admin",
+    "site_header": "EgyCrowd",
+    "site_brand": "EgyCrowd 💛",
+    "welcome_sign": "Welcome to the dashboard EgyCrowd",
+    "copyright": "EgyCrowd",
+    "search_model": ["accounts.User"],
+    "show_ui_builder": True,  
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "theme": "litera",
+    "dark_mode_theme": None,
+    "navbar": "navbar-pink",
+    "sidebar": "sidebar-light-pink",
+    "brand_colour": "navbar-pink",
+    "accent": "accent-pink",
+    "no_navbar_border": True,
+    "layout_boxed": False,
+    "sidebar_nav_flat_style": True,
+    "button_classes": {
+        "primary": "btn-pink",
+        "secondary": "btn-outline-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success",
     },
 }
