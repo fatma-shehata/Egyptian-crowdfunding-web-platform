@@ -1,0 +1,410 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile — EgyCrowd{% endblock %}
+
+{% block content %}
+
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+
+            <!-- Sidebar -->
+            <div class="col-md-4 col-lg-3">
+                <div class="p-4" style="background:#fff;
+                            border-radius:16px;
+                            box-shadow:0 4px 20px rgba(0,0,0,0.06);">
+
+                    <!-- Avatar + Name -->
+                    <div class="d-flex align-items-center gap-3">
+
+                        <!-- Avatar -->
+                        <div style="flex-shrink: 0;">
+                            {% include "partials/_avatar.html" with user_obj=profile_user size=90 %}
+                        </div>
+
+                        <!-- Name -->
+                        <div style="min-width:0;">
+
+                            <h5 class="mb-0" style="font-size:1.15rem;
+                   color:var(--color-text-dark);
+                   white-space:nowrap;">
+                                {{ profile_user.get_full_name }}
+                            </h5>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Contact Information -->
+                    <div class="mt-4 text-start" style="font-size:0.85rem;
+            color:#555;">
+
+                        <!-- Email -->
+                        {% if profile_user.email %}
+                        <div class="d-flex align-items-center gap-2 mb-2">
+
+                            <i class="bi bi-envelope" style="color:var(--color-accent-gold);">
+                            </i>
+
+                            <span style="word-break:break-word;">
+                                {{ profile_user.email }}
+                            </span>
+
+                        </div>
+                        {% endif %}
+
+
+                        <!-- Phone -->
+                        {% if profile_user.mobile_phone %}
+                        <div class="d-flex align-items-center gap-2 mb-2">
+
+                            <i class="bi bi-telephone" style="color:var(--color-accent-gold);">
+                            </i>
+
+                            <span>
+                                {{ profile_user.mobile_phone }}
+                            </span>
+
+                        </div>
+                        {% endif %}
+
+
+                        <!-- Country -->
+                        {% if profile_user.country %}
+                        <div class="d-flex align-items-center gap-2 mb-2">
+
+                            <i class="bi bi-geo-alt" style="color:var(--color-accent-gold);">
+                            </i>
+
+                            <span>
+                                {{ profile_user.country }}
+                            </span>
+
+                        </div>
+                        {% endif %}
+
+
+                        <!-- Facebook -->
+                        {% if profile_user.facebook_profile %}
+                        <div class="d-flex align-items-center gap-2 mb-2">
+
+                            <i class="bi bi-facebook" style="color:var(--color-accent-gold);">
+                            </i>
+
+                            <a href="{{ profile_user.facebook_profile }}" target="_blank" rel="noopener" style="color:#555;
+                  text-decoration:none;">
+                                Facebook profile
+                            </a>
+
+                        </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Edit Profile -->
+                    <a href="{% url 'accounts:profile_edit' %}"
+                        class="btn-pill btn-pill-outline w-100 mb-2 mt-3 d-block" style="text-align: center;">
+                        Edit Profile
+                    </a>
+
+
+                    <!-- Delete Account -->
+                    <a href="{% url 'accounts:profile_delete' %}" class="d-block mt-2 text-center" style="color:#c0392b;
+                              font-size:0.85rem;
+                              text-decoration:none;">
+                        Delete Account
+                    </a>
+
+                </div>
+            </div>
+
+
+            <!-- Main Content / Tabs -->
+            <div class="col-md-8 col-lg-9">
+
+                <!-- Tabs -->
+                <ul class="nav mb-4" style="border-bottom:1.5px solid rgba(11,61,46,0.1);
+                           gap:8px;">
+
+                    <!-- Projects Tab -->
+                    <li class="nav-item">
+
+                        <button class="nav-link active tab-btn" data-tab="projects" style="border:none;
+                                       background:none;
+                                       font-weight:600;
+                                       padding:10px 6px;
+                                       color:var(--color-bg-dark);
+                                       border-bottom:3px solid var(--color-accent-gold);">
+
+                            My Projects ({{ my_projects.count }})
+
+                        </button>
+
+                    </li>
+
+
+                    <!-- Donations Tab -->
+                    <li class="nav-item">
+
+                        <button class="nav-link tab-btn" data-tab="donations" style="border:none;
+                                       background:none;
+                                       font-weight:600;
+                                       padding:10px 6px;
+                                       color:#999;
+                                       border-bottom:3px solid transparent;">
+
+                            My Donations ({{ my_donations.count }})
+
+                        </button>
+
+                    </li>
+
+                </ul>
+
+
+                <!-- Projects Tab Content -->
+                <div id="tab-projects" class="tab-pane">
+
+                    <div class="row g-4">
+
+                        {% for project in my_projects %}
+
+                        <div class="col-md-6">
+
+                            <a href="{% url 'projects:project_detail' project.slug %}" class="text-decoration-none">
+
+                                <div class="project-card h-100" style="{% if project.is_cancelled %}opacity: 0.6;{% endif %}">
+
+                                    <!-- Project Image -->
+                                    <div class="project-card-img-wrap" style="position: relative;">
+
+                                        {% with project.images.first as img %}
+
+                                        {% if img %}
+
+                                        <img src="{{ img.image.url }}" class="project-card-img"
+                                            alt="{{ project.title }}">
+
+                                        {% endif %}
+
+                                        {% endwith %}
+
+                                        {% if project.is_cancelled %}
+                                        <span style="position: absolute; top: 10px; right: 10px; background: #c0392b; color: #fff; font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 999px;">
+                                            CANCELLED
+                                        </span>
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    <!-- Project Information -->
+                                    <div class="p-3">
+
+                                        <h6 style="color:var(--color-text-dark);">
+                                            {{ project.title }}
+                                        </h6>
+
+
+                                        <!-- Progress -->
+                                        <div class="progress-egycrowd mb-1">
+
+                                            <div class="progress-egycrowd-bar"
+                                                style="width:{{ project.progress_percent }}%;">
+                                            </div>
+
+                                        </div>
+
+
+                                        <span style="font-size:0.8rem;
+                                                    color:#888;">
+
+                                            {{ project.progress_percent }}% funded
+
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </a>
+
+                        </div>
+
+
+                        {% empty %}
+
+                        <p style="color:#888;">
+
+                            You haven't started any projects yet.
+
+                            <a href="{% url 'projects:project_create' %}" style="color:var(--color-accent-blue);">
+                                Start one now
+                            </a>.
+
+                        </p>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- Donations Tab Content -->
+                <div id="tab-donations" class="tab-pane" style="display:none;">
+
+                    <table class="table">
+
+                        <thead>
+
+                            <tr style="font-size:0.8rem;
+                                       color:#888;
+                                       text-transform:uppercase;">
+
+                                <th>Project</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for donation in my_donations %}
+
+                            <tr>
+
+                                <!-- Project -->
+                                <td>
+
+                                    <a href="{% url 'projects:project_detail' donation.project.slug %}" style="color:var(--color-text-dark);
+                                              text-decoration:none;
+                                              font-weight:600;">
+
+                                        {{ donation.project.title }}
+
+                                    </a>
+
+                                </td>
+
+
+                                <!-- Amount -->
+                                <td>
+                                    {{ donation.amount }} EGP
+                                </td>
+
+
+                                <!-- Status -->
+                                <td>
+
+                                    {% if donation.status == 'completed' %}
+                                    <span class="badge-category" style="background: var(--color-bg-dark);">
+                                    {% else %}
+                                    <span class="badge-category" style="background: #999;">
+                                    {% endif %}
+
+                                        {{ donation.get_status_display }}
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Date -->
+                                <td style="color:#888;">
+
+                                    {{ donation.created_at|date:"M d, Y" }}
+
+                                </td>
+
+                            </tr>
+
+
+                            {% empty %}
+
+                            <tr>
+
+                                <td colspan="4" style="color:#888;">
+
+                                    No donations yet.
+
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- Tabs JavaScript -->
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const buttons = document.querySelectorAll(".tab-btn");
+
+
+        buttons.forEach((btn) => {
+
+            btn.addEventListener("click", function () {
+
+                // Reset all buttons
+                buttons.forEach((b) => {
+
+                    b.classList.remove("active");
+
+                    b.style.color = "#999";
+
+                    b.style.borderBottomColor = "transparent";
+
+                });
+
+
+                // Activate clicked button
+                this.classList.add("active");
+
+                this.style.color = "var(--color-bg-dark)";
+
+                this.style.borderBottomColor =
+                    "var(--color-accent-gold)";
+
+
+                // Hide all tabs
+                document.querySelectorAll(".tab-pane").forEach((pane) => {
+
+                    pane.style.display = "none";
+
+                });
+
+
+                // Show selected tab
+                document.getElementById(
+                    "tab-" + this.dataset.tab
+                ).style.display = "block";
+
+            });
+
+        });
+
+    });
+
+</script>
+
+{% endblock %}

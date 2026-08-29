@@ -23,3 +23,4 @@ class ReportAdmin(admin.ModelAdmin):
     @admin.action(description="Mark selected reports as resolved")
     def mark_resolved(self, request, queryset):
         queryset.update(is_resolved=True)
+

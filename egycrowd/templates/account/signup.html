@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Sign Up — EgyCrowd{% endblock %}
+
+{% block content %}
+<div class="auth-split">
+    <div class="auth-split-visual">
+        <a href="{% url 'homepage' %}" style="color: #fff; font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; text-decoration: none;">EgyCrowd</a>
+
+        <div class="auth-split-quote">
+            <h2>Every great project starts with someone who believed first.</h2>
+            <p>Join thousands of Egyptians backing the ideas that shape their communities.</p>
+        </div>
+
+        <div class="auth-split-stats">
+            <div class="auth-split-stat">
+                <h3>2,400+</h3>
+                <span>Projects funded</span>
+            </div>
+            <div class="auth-split-stat">
+                <h3>35M+</h3>
+                <span>EGP raised</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-split-form">
+        <div class="auth-split-form-inner">
+            <p class="section-label mb-1">Join EgyCrowd</p>
+            <h2 class="mb-4">Create your account</h2>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label>{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="auth-error-text">{{ field.errors|striptags }}</div>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <div style="color: #888; font-size: 0.78rem; margin-top: 4px;">{{ field.help_text }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="auth-submit-btn">Create Account</button>
+            </form>
+
+            <p class="text-center mt-4" style="color: #888;">
+                Already have an account? <a href="{% url 'account_login' %}" style="color: var(--color-accent-blue); font-weight: 600;">Log in</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

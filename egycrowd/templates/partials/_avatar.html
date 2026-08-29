@@ -1,0 +1,11 @@
+{% if user_obj.profile_picture %}
+    <img src="{{ user_obj.profile_picture.url }}"
+         class="avatar-img"
+         style="width: {{ size|default:'40' }}px; height: {{ size|default:'40' }}px;"
+         alt="{{ user_obj.get_full_name }}">
+{% else %}
+    <div class="avatar-initials"
+         style="width: {{ size|default:'40' }}px; height: {{ size|default:'40' }}px; font-size: {{ size|default:'40'|add:'-20' }}%;">
+        {{ user_obj.first_name|first|upper }}{{ user_obj.last_name|first|upper }}
+    </div>
+{% endif %}

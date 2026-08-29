@@ -1,0 +1,21 @@
+# Environment & secrets
+.env
+venv/
+__pycache__/
+*.pyc
+
+# Database
+db.sqlite3
+
+# Media (user uploads - profile pictures, project images)
+media/
+
+# Static files (auto-generated)
+staticfiles/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

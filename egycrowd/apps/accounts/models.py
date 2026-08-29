@@ -23,3 +23,35 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.get_full_name()} <{self.email}>"
+
+
+class RegularUserManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_staff=False)
+
+
+class AdminUserManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_staff=True)
+
+
+class RegularUser(User):
+    """Proxy model — same database table as User, but shows only
+    non-staff (regular donors/creators) in a separate admin section."""
+    objects = RegularUserManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Regular User"
+        verbose_name_plural = "Regular Users"
+
+
+class AdminUser(User):
+    """Proxy model — same database table as User, but shows only
+    staff/admin accounts in a separate admin section."""
+    objects = AdminUserManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Admin User"
+        verbose_name_plural = "Admin Users"

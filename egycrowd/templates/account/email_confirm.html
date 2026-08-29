@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Confirm Email — EgyCrowd{% endblock %}
+
+{% block content %}
+<section style="min-height: 80vh; display: flex; align-items: center; justify-content: center; background: var(--color-bg-dark);">
+    <div class="text-center" style="max-width: 480px; padding: 40px;">
+        {% if confirmation %}
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(45,156,219,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                <i class="bi bi-shield-check" style="font-size: 2rem; color: var(--color-accent-blue);"></i>
+            </div>
+            <h2 style="color: #fff;">Confirm your email</h2>
+            <p style="color: rgba(255,255,255,0.65); margin-top: 12px;">
+                Confirm that <strong style="color: #fff;">{{ confirmation.email_address.email }}</strong> is your email address.
+            </p>
+            <form method="post" action="{% url 'account_confirm_email' confirmation.key %}" class="mt-4">
+                {% csrf_token %}
+                <button type="submit" class="auth-submit-btn" style="max-width: 260px;">Confirm</button>
+            </form>
+        {% else %}
+            <h2 style="color: #fff;">This link has expired</h2>
+            <p style="color: rgba(255,255,255,0.65); margin-top: 12px;">
+                Activation links expire after 24 hours. Please sign up again to get a new one.
+            </p>
+            <a href="{% url 'account_signup' %}" class="btn-pill btn-pill-primary mt-4 d-inline-block">Sign Up Again</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

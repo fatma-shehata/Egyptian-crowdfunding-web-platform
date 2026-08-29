@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Check Your Email — EgyCrowd{% endblock %}
+
+{% block content %}
+<section style="min-height: 80vh; display: flex; align-items: center; justify-content: center; background: var(--color-bg-dark);">
+    <div class="text-center" style="max-width: 480px; padding: 40px;">
+        <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(240,180,41,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+            <i class="bi bi-envelope-check" style="font-size: 2rem; color: var(--color-accent-gold);"></i>
+        </div>
+        <h2 style="color: #fff;">Check your inbox</h2>
+        <p style="color: rgba(255,255,255,0.65); margin-top: 12px;">
+            We've sent a confirmation link to your email. Click it to activate your account —
+            the link expires in 24 hours.
+        </p>
+        <a href="{% url 'homepage' %}" class="btn-pill btn-pill-primary mt-4 d-inline-block">Back to Home</a>
+    </div>
+</section>
+{% endblock %}

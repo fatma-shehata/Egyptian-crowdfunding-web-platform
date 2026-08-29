@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 from taggit.managers import TaggableManager
-
+from django.urls import reverse
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -53,6 +53,8 @@ class Project(models.Model):
                 counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
+    def get_absolute_url(self):
+        return reverse("projects:project_detail", kwargs={"slug": self.slug})
 
     @property
     def total_donated(self):
@@ -81,12 +83,12 @@ class Project(models.Model):
         return self.progress_percent < 25
 
     def similar_projects(self, count=4):
-        tag_ids = self.tags.values_list('id', flat=True)
-        return (
-            Project.objects.filter(tags__in=tag_ids)
-            .exclude(id=self.id)
-            .distinct()[:count]
-        )
+            tag_ids = self.tags.values_list('id', flat=True)
+            return (
+                    Project.objects.filter(tags__in=tag_ids, is_cancelled=False)
+                    .exclude(id=self.id)
+                    .distinct()[:count]
+                    )
 class ProjectImage(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='projects/%Y/%m/')

@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+{% block title %}{{ project.title }} — EgyCrowd{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+
+            <!-- Left: image, details, comments -->
+            <div class="col-lg-8">
+
+                {% if project.images.all %}
+                <div class="project-slider mb-4">
+                    <div class="project-slider-track" id="sliderTrack">
+                        {% for img in project.images.all %}
+                        <img src="{{ img.image.url }}" class="project-slider-img" alt="{{ project.title }}">
+                        {% endfor %}
+                    </div>
+                    {% if project.images.count > 1 %}
+                    <button class="slider-arrow slider-arrow-left" onclick="moveSlide(-1)"><i
+                            class="bi bi-chevron-left"></i></button>
+                    <button class="slider-arrow slider-arrow-right" onclick="moveSlide(1)"><i
+                            class="bi bi-chevron-right"></i></button>
+                    <div class="slider-dots" id="sliderDots">
+                        {% for img in project.images.all %}
+                        <span class="slider-dot {% if forloop.first %}active{% endif %}"
+                            onclick="goToSlide({{ forloop.counter0 }})"></span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if project.category %}
+                <span class="badge-category">{{ project.category.name }}</span>
+                {% endif %}
+                <h1 class="mt-3 mb-3" style="font-size: 2.2rem;">{{ project.title }}</h1>
+
+                <div class="d-flex align-items-center gap-2 mb-4" style="color: #888; font-size: 0.9rem;">
+                    <i class="bi bi-person-circle"></i>
+                    <span>by {{ project.creator.get_full_name }}</span>
+                    <span>&middot;</span>
+                    <div class="text-warning">
+                        {% for i in "12345" %}
+                        <i
+                            class="bi {% if forloop.counter <= project.average_rating %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                        {% endfor %}
+                    </div>
+                    <span>({{ project.average_rating|floatformat:1 }})</span>
+                </div>
+
+                <div class="mb-4">
+                    {% for tag in project.tags.all %}
+                    <span class="btn-pill btn-pill-outline"
+                        style="padding: 4px 14px; font-size: 0.8rem; display: inline-block; margin-bottom: 6px;">#{{ tag.name }}</span>
+                    {% endfor %}
+                </div>
+
+                <p style="line-height: 1.8; color: #444;">{{ project.details|linebreaks }}</p>
+
+                <hr class="my-5" style="border-color: rgba(11,61,46,0.1);">
+
+                <!-- Rating form -->
+                {% if user.is_authenticated %}
+                <div style="background: #f7f5ef; border-radius: 16px; padding: 20px; margin-bottom: 32px;">
+                    <h6 class="mb-3">Rate this project</h6>
+                    <form method="post" action="{% url 'projects:project_rate' project.slug %}"
+                        class="d-flex align-items-center gap-3">
+                        {% csrf_token %}
+                        <div class="star-rating-input">
+                            {% for i in "54321" %}
+                            <input type="radio" name="score" value="{{ i }}" id="star{{ i }}">
+                            <label for="star{{ i }}">★</label>
+                            {% endfor %}
+                        </div>
+                        <button type="submit" class="btn-pill btn-pill-outline"
+                            style="padding: 8px 20px; font-size: 0.85rem;">Submit Rating</button>
+                    </form>
+                </div>
+                {% endif %}
+
+                <h4 class="mb-4">Comments ({{ comments.count }})</h4>
+
+                <!-- Comment form -->
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'projects:add_comment' project.slug %}" class="mb-4">
+                    {% csrf_token %}
+                    <textarea name="body" class="w-100" rows="3" placeholder="Share your thoughts..." required
+                        style="padding: 12px 16px; border-radius: 12px; border: 1.5px solid rgba(11,61,46,0.15);"></textarea>
+                    <button type="submit" class="btn-pill btn-pill-primary mt-2" style="border: none;">Post
+                        Comment</button>
+                </form>
+                {% else %}
+                <p style="color: #888;"><a href="{% url 'account_login' %}" style="color: var(--color-accent-blue);">Log
+                        in</a> to leave a comment.</p>
+                {% endif %}
+
+                {% for comment in comments %}
+                {% include "projects/partials/_comment.html" %}
+                {% empty %}
+                <p class="text-muted">No comments yet.</p>
+                {% endfor %}
+            </div>
+
+            <!-- Right: donation sidebar -->
+            <div class="col-lg-4">
+                <div class="floating-card" style="position: sticky; top: 100px; width: 100%; padding: 28px;">
+                    <h2 class="mb-0" id="totalDonatedDisplay" style="color: var(--color-bg-dark); font-size: 2rem;">{{ project.total_donated }}
+                        EGP</h2>
+                    <p style="color: #888;">raised of {{ project.total_target }} EGP goal</p>
+
+                    <div class="progress-egycrowd mb-2">
+                        <div class="progress-egycrowd-bar" id="progressBarFill"  style="width: {{ project.progress_percent }}%;"></div>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #888;"><span id="progressPercentText">{{ project.progress_percent }}% funded</span> &middot; ends {{ project.end_time|date:"M d, Y" }}</p>
+
+                    {% if user.is_authenticated %}
+                    <button type="button" class="btn-pill btn-pill-primary w-100 mt-4" style="border: none;" data-bs-toggle="modal" data-bs-target="#donateModal">
+                    Donate Now
+                    </button>
+                    {% else %}
+                    <a href="{% url 'account_login' %}" class="btn-pill btn-pill-primary w-100 text-center d-block mt-4">
+                    Log In to Donate
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+{% if project.creator == user and not project.is_cancelled %}
+    {% if project.can_be_cancelled %}
+        <form method="post" action="{% url 'projects:project_cancel' project.slug %}"
+              onsubmit="return confirm('Are you sure you want to cancel this project? This cannot be undone.');" class="mt-3">
+            {% csrf_token %}
+            <button type="submit" style="background: none; border: 1.5px solid #c0392b; color: #c0392b; padding: 8px 20px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;">
+                Cancel this project
+            </button>
+        </form>
+    {% else %}
+        <p style="color: #999; font-size: 0.85rem; margin-top: 12px;">
+            <i class="bi bi-lock"></i> This project can no longer be cancelled — it has passed 25% of its funding goal.
+        </p>
+    {% endif %}
+{% endif %}
+
+{% if user.is_authenticated and project.creator != user %}
+    <button type="button" class="mt-2" style="background: none; border: none; color: #999; font-size: 0.8rem; text-decoration: underline; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#reportProjectModal">
+        <i class="bi bi-flag"></i> Report this project
+    </button>
+{% endif %}
+        <!-- Similar projects -->
+        {% if similar_projects %}
+        <div class="mt-5 pt-5">
+            <p class="section-label mb-1">You might also like</p>
+            <h3 class="mb-4">Similar Projects</h3>
+            <div class="row g-4">
+                {% for sp in similar_projects %}
+                <div class="col-6 col-md-3">
+                    <a href="{% url 'projects:project_detail' sp.slug %}" class="text-decoration-none">
+                        <div class="project-card h-100">
+                            <div class="project-card-img-wrap">
+                                {% with sp.images.first as img %}
+                                {% if img %}<img src="{{ img.image.url }}" class="project-card-img"
+                                    alt="{{ sp.title }}">{% endif %}
+                                {% endwith %}
+                            </div>
+                            <div class="p-3">
+                                <h6 style="color: var(--color-text-dark);">{{ sp.title }}</h6>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% if user.is_authenticated %}
+<div class="modal fade" id="donateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px; border: none; overflow: hidden;">
+            <div class="modal-header" style="background: var(--color-bg-dark); border: none;">
+                <h5 class="modal-title" style="color: #fff;">Support "{{ project.title }}"</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="donateSuccessMsg" class="d-none text-center py-3">
+                    <i class="bi bi-check-circle-fill" style="font-size: 2.5rem; color: var(--color-accent-gold);"></i>
+                    <h5 class="mt-3">Thank you!</h5>
+                    <p style="color: #888;">Your donation has been added to this project.</p>
+                </div>
+
+                <form id="donateForm">
+                    <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Donation Amount (EGP)</label>
+                    <input type="number" name="amount" id="donateAmount" min="1" step="0.01" placeholder="e.g. 500" required
+                           style="width: 100%; padding: 13px 16px; border-radius: 10px; border: 1.5px solid rgba(11,61,46,0.15); font-size: 1.1rem;">
+
+                    <div class="d-flex gap-2 my-3">
+                        {% for preset in "100,250,500,1000"|make_list %}{% endfor %}
+                        <button type="button" class="btn-pill btn-pill-outline preset-btn" data-amount="100" style="padding: 8px 16px; font-size: 0.85rem;">100</button>
+                        <button type="button" class="btn-pill btn-pill-outline preset-btn" data-amount="250" style="padding: 8px 16px; font-size: 0.85rem;">250</button>
+                        <button type="button" class="btn-pill btn-pill-outline preset-btn" data-amount="500" style="padding: 8px 16px; font-size: 0.85rem;">500</button>
+                        <button type="button" class="btn-pill btn-pill-outline preset-btn" data-amount="1000" style="padding: 8px 16px; font-size: 0.85rem;">1000</button>
+                    </div>
+
+                    <div id="donateError" class="d-none" style="color: #c0392b; font-size: 0.85rem; margin-bottom: 12px;"></div>
+
+                    <button type="submit" class="auth-submit-btn" id="donateSubmitBtn">Confirm Donation</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% if user.is_authenticated %}
+<div class="modal fade" id="reportProjectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px; border: none;">
+            <div class="modal-header" style="border: none;">
+                <h5 class="modal-title">Report this project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 pt-0">
+                <div id="reportSuccessMsg" class="d-none text-center py-3">
+                    <i class="bi bi-check-circle-fill" style="font-size: 2rem; color: var(--color-accent-gold);"></i>
+                    <p class="mt-2 mb-0">Thanks — our team will review this.</p>
+                </div>
+                <form id="reportProjectForm">
+                    <textarea id="reportReason" placeholder="Why are you reporting this project?" rows="3" required
+                              style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid rgba(11,61,46,0.15);"></textarea>
+                    <button type="submit" class="auth-submit-btn mt-3" style="background: #c0392b; color: #fff;">Submit Report</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+<script>
+    let currentSlide = 0;
+    const track = document.getElementById("sliderTrack");
+    const dots = document.querySelectorAll(".slider-dot");
+    const totalSlides = {{ project.images.count }};
+
+    function updateSlider() {
+        track.style.transform = `translateX(-${currentSlide * 100}%)`;
+        dots.forEach((dot, i) => dot.classList.toggle("active", i === currentSlide));
+    }
+
+    function moveSlide(direction) {
+        currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+        updateSlider();
+    }
+
+    function goToSlide(index) {
+        currentSlide = index;
+        updateSlider();
+    }
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".reply-toggle").forEach(function (btn) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                const id = btn.dataset.commentId;
+                document.getElementById("reply-form-" + id).classList.toggle("d-none");
+            });
+        });
+    });
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const presetBtns = document.querySelectorAll(".preset-btn");
+    const amountInput = document.getElementById("donateAmount");
+
+    presetBtns.forEach(btn => {
+        btn.addEventListener("click", function () {
+            amountInput.value = this.dataset.amount;
+        });
+    });
+
+    const form = document.getElementById("donateForm");
+    if (form) {
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const btn = document.getElementById("donateSubmitBtn");
+            const errorBox = document.getElementById("donateError");
+            errorBox.classList.add("d-none");
+            btn.disabled = true;
+            btn.textContent = "Processing...";
+
+            const formData = new FormData(form);
+            fetch("{% url 'donations:donate_ajax' project.slug %}", {
+                method: "POST",
+                headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                body: formData,
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    form.classList.add("d-none");
+                    document.getElementById("donateSuccessMsg").classList.remove("d-none");
+
+                    document.getElementById("totalDonatedDisplay").textContent = data.total_donated.toLocaleString() + " EGP";
+                    document.getElementById("progressBarFill").style.width = data.progress_percent + "%";
+                    document.getElementById("progressPercentText").textContent = data.progress_percent + "% funded";
+
+                    setTimeout(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById("donateModal"));
+                        modal.hide();
+                        location.reload();
+                    }, 1800);
+                } else {
+                    errorBox.textContent = data.error;
+                    errorBox.classList.remove("d-none");
+                    btn.disabled = false;
+                    btn.textContent = "Confirm Donation";
+                }
+            })
+            .catch(() => {
+                errorBox.textContent = "Something went wrong. Please try again.";
+                errorBox.classList.remove("d-none");
+                btn.disabled = false;
+                btn.textContent = "Confirm Donation";
+            });
+        });
+    }
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Report project
+    const reportForm = document.getElementById("reportProjectForm");
+    if (reportForm) {
+        reportForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const reason = document.getElementById("reportReason").value.trim();
+            if (!reason) return;
+
+            fetch("{% url 'projects:report_project' project.slug %}", {
+                method: "POST",
+                headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                body: new URLSearchParams({ reason: reason }),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    reportForm.classList.add("d-none");
+                    document.getElementById("reportSuccessMsg").classList.remove("d-none");
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(document.getElementById("reportProjectModal")).hide();
+                    }, 1500);
+                }
+            });
+        });
+    }
+
+    // Report comment: toggle small inline form
+    document.querySelectorAll(".comment-report-toggle").forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+            e.preventDefault();
+            const id = btn.dataset.commentId;
+            document.getElementById("comment-report-form-" + id).classList.toggle("d-none");
+        });
+    });
+
+    // Report comment: submit
+    document.querySelectorAll(".comment-report-form").forEach(function (form) {
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const commentId = form.dataset.commentId;
+            const reason = form.querySelector(".comment-report-reason").value.trim();
+            if (!reason) return;
+
+            fetch(`/interact/comment/${commentId}/report/`, {
+                method: "POST",
+                headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                body: new URLSearchParams({ reason: reason }),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    form.innerHTML = '<span style="color: var(--color-accent-blue); font-size: 0.8rem;">Reported. Thank you.</span>';
+                }
+            });
+        });
+    });
+
+});
+</script>
+{% endblock %}

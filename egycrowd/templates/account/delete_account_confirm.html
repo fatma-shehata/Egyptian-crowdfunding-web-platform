@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Delete Account — EgyCrowd{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container" style="max-width: 460px;">
+        <div style="border: 1.5px solid #f5c6c6; border-radius: 16px; padding: 30px; background: #fff8f8;">
+            <h4 style="color: #c0392b;"><i class="bi bi-exclamation-triangle"></i> Delete Your Account</h4>
+            <p style="color: #888;">This action is permanent and cannot be undone. All your projects, comments, and donation history will be removed.</p>
+
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="auth-error-text">{{ field.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="auth-submit-btn" style="background: #c0392b; color: #fff;"
+                    onclick="return confirm('Are you absolutely sure? This cannot be undone.');">
+                    Permanently Delete My Account
+                </button>
+                <a href="{% url 'accounts:profile' %}" class="btn-pill btn-pill-outline w-100 text-center d-block mt-2">Cancel</a>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
