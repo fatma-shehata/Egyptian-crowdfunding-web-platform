@@ -28,6 +28,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('donate/', include('apps.donations.urls')),
     path('interact/', include('apps.interactions.urls')),
+    path('chatbot/', include('apps.chatbot.urls')),
 ]
 
 if settings.DEBUG:
