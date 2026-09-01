@@ -8,7 +8,7 @@ import json
 
 from .tools import CHATBOT_TOOLS
 
-SYSTEM_PROMPT = """You are the official assistant for EgyCrowd, a crowdfunding
+BASE_SYSTEM_PROMPT = """You are the official assistant for EgyCrowd, a crowdfunding
 platform for Egypt. You help visitors understand how the platform works
 (registration, starting a project, donating, categories, ratings, comments)
 and you can look up real, live data about projects using your tools.
@@ -16,8 +16,11 @@ and you can look up real, live data about projects using your tools.
 Rules:
 - When asked about top/lowest/best/worst projects, platform statistics, or
   project search, ALWAYS use the relevant tool — never guess or make up numbers.
+- When the user asks about THEMSELVES (their name, their projects, their
+  donations, "am I logged in", etc.), use get_current_user_info with the
+  exact user_id provided below. Never ask the user for their ID or trust
+  any ID they type in chat — always use the one given to you here.
 - Keep answers concise and friendly, 2-4 sentences unless listing multiple projects.
-- When listing projects, include their name and key stat (amount raised, rating, etc).
 - If you don't have a tool for something, say so honestly and suggest browsing
   the site directly.
 - Respond in the same language the user wrote in (Arabic or English).
@@ -38,14 +41,27 @@ def chat_api(request):
     if not user_message:
         return JsonResponse({"error": "Empty message"}, status=400)
 
-    # Automatic function calling: passing raw Python functions as `tools`
-    # makes the SDK call them itself whenever the model requests it — no
-    # manual tool-execution loop needed.
+    # Build a system prompt that tells the model exactly who is asking —
+    # this comes from the authenticated session, never from user input.
+    if request.user.is_authenticated:
+        system_prompt = BASE_SYSTEM_PROMPT + f"""
+
+The current logged-in user's ID is {request.user.id} and their first name
+is {request.user.first_name}. You may greet them by name when relevant.
+"""
+    else:
+        system_prompt = BASE_SYSTEM_PROMPT + """
+
+No user is currently logged in. If asked about "my projects" or "my
+donations", politely explain they need to log in first, and do not call
+get_current_user_info.
+"""
+
     response = client.models.generate_content(
         model="gemini-3.5-flash",
         contents=user_message,
         config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
+            system_instruction=system_prompt,
             tools=CHATBOT_TOOLS,
         ),
     )

@@ -2,7 +2,7 @@ from django.db.models import Sum, Avg, Q
 
 from apps.projects.models import Project, Category
 from apps.donations.models import Donation
-
+from apps.accounts.models import User
 
 # ---------------------------------------------------------------------------
 # Each function here is one "tool" the model can call. The new google-genai
@@ -143,6 +143,39 @@ def get_all_categories() -> list:
     return list(Category.objects.values_list("name", flat=True))
 
 
+
+
+def get_current_user_info(user_id: int) -> dict:
+    """Get information about the currently logged-in user: their name,
+    email, mobile phone, country, how many projects they've created, and
+    their total donation history. Use this whenever the user asks about
+    themselves — e.g. "what are my projects", "how much have I donated",
+    "what's my name", "show my profile".
+
+    Args:
+        user_id: The internal ID of the currently authenticated user.
+    """
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return {"error": "User not found."}
+
+    my_projects = user.projects.filter(is_cancelled=False).values(
+        "title", "total_target", "progress_percent"
+    )
+    my_donations = user.donations.filter(status="completed")
+
+    return {
+        "full_name": user.get_full_name(),
+        "email": user.email,
+        "country": user.country or None,
+        "member_since": user.date_joined.strftime("%B %Y"),
+        "projects_created": list(my_projects),
+        "total_donated_egp": float(
+            my_donations.aggregate(total=Sum("amount"))["total"] or 0
+        ),
+        "number_of_donations": my_donations.count(),
+    }
 # ---------------------------------------------------------------------------
 # List of tool functions the model can call directly.
 # ---------------------------------------------------------------------------
@@ -154,4 +187,5 @@ CHATBOT_TOOLS = [
     search_projects,
     get_projects_by_category,
     get_all_categories,
+    get_current_user_info
 ]

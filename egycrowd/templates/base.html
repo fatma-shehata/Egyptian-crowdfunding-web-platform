@@ -47,6 +47,37 @@
 <main>
     {% block content %}{% endblock %}
 </main>
+</main>
+
+<footer style="background: var(--color-bg-dark); color: rgba(255,255,255,0.7); padding: 50px 0 24px; margin-top: 60px;">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <h5 style="color: #fff; font-family: var(--font-display);">EgyCrowd</h5>
+                <p style="font-size: 0.85rem;">Egypt's platform for bringing great ideas to life through community funding.</p>
+            </div>
+            <div class="col-md-4">
+                <h6 style="color: #fff;">Explore</h6>
+                <ul class="list-unstyled" style="font-size: 0.85rem;">
+                    <li class="mb-2"><a href="{% url 'projects:project_list' %}" style="color: rgba(255,255,255,0.7); text-decoration: none;">All Projects</a></li>
+                    <li class="mb-2"><a href="{% url 'homepage' %}" style="color: rgba(255,255,255,0.7); text-decoration: none;">Home</a></li>
+                    {% if user.is_authenticated %}
+                    <li class="mb-2"><a href="{% url 'projects:project_create' %}" style="color: rgba(255,255,255,0.7); text-decoration: none;">Start a Project</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6 style="color: #fff;">Support</h6>
+                <ul class="list-unstyled" style="font-size: 0.85rem;">
+                    <li class="mb-2"><a href="{% url 'contact' %}" style="color: rgba(255,255,255,0.7); text-decoration: none;">Contact Us</a></li>
+                    <li class="mb-2"><a href="#" style="color: rgba(255,255,255,0.7); text-decoration: none;">How it works</a></li>
+                </ul>
+            </div>
+        </div>
+        <hr style="border-color: rgba(255,255,255,0.1); margin: 32px 0 16px;">
+        <p class="text-center mb-0" style="font-size: 0.8rem;">&copy; {% now "Y" %} EgyCrowd. Made in Egypt 🇪🇬</p>
+    </div>
+</footer>
 <div id="chatWidget">
     <button id="chatToggleBtn">
         <i class="bi bi-chat-dots-fill"></i>

@@ -25,6 +25,8 @@ from django.utils.text import slugify
 
 from apps.interactions.models import Report
 
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.views.generic import UpdateView
 
 class ProjectListView(ListView):
     model = Project
@@ -52,11 +54,17 @@ class ProjectDetailView(DetailView):
     slug_field = "slug"
 
     def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        project = self.object
-        ctx["similar_projects"] = project.similar_projects()
-        ctx["comments"] = project.comments.filter(parent__isnull=True).select_related("user")
-        return ctx
+            ctx = super().get_context_data(**kwargs)
+            project = self.object
+            ctx["similar_projects"] = project.similar_projects()
+            ctx["comments"] = (
+                project.comments.filter(parent__isnull=True)
+                .select_related("user")
+                .prefetch_related("replies__user")
+                )
+            if self.request.user.is_authenticated:
+                    ctx["user_rating"] = project.ratings.filter(user=self.request.user).first()
+            return ctx
 
 
 class ProjectCreateView(LoginRequiredMixin, CreateView):
@@ -66,9 +74,6 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        # مفيش self.object هنا لسه (لسه المستخدم مبعتش الفورم)،
-        # يعني similar_projects/comments مالهومش مكان — دي حاجات خاصة بصفحة التفاصيل بس.
-        # اللي محتاجينه هنا هو الـ image_formset بس، وكان ناقص من قبل.
         if self.request.POST:
             ctx["image_formset"] = ProjectImageFormSet(self.request.POST, self.request.FILES)
         else:
@@ -173,3 +178,42 @@ def report_project(request, slug):
             reason=reason,
         )
     return JsonResponse({"success": True})
+
+
+class ProjectUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Project
+    form_class = ProjectForm
+    template_name = "projects/project_edit.html"
+    slug_field = "slug"
+
+    def test_func(self):
+        # Only the project's creator can edit it — anyone else gets a 403.
+        return self.get_object().creator == self.request.user
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["image_formset"] = ProjectImageFormSet(
+            self.request.POST or None, self.request.FILES or None, instance=self.object
+        )
+        return ctx
+
+    def form_valid(self, form):
+        ctx = self.get_context_data()
+        image_formset = ctx["image_formset"]
+        if image_formset.is_valid():
+            self.object = form.save()
+            image_formset.instance = self.object
+            image_formset.save()
+            messages.success(self.request, "Your project has been updated.")
+            return redirect(self.object.get_absolute_url())
+        return self.render_to_response(self.get_context_data(form=form))
+
+
+#===========remove rating view===========
+@login_required
+@require_POST
+def remove_rating(request, slug):
+    project = get_object_or_404(Project, slug=slug)
+    Rating.objects.filter(project=project, user=request.user).delete()
+    messages.success(request, "Your rating has been removed.")
+    return redirect(project.get_absolute_url())

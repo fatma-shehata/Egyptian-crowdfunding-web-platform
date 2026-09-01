@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Contact Us — EgyCrowd{% endblock %}
+
+{% block content %}
+<section class="hero-dark py-5" style="padding-top: 60px; padding-bottom: 60px;">
+    <div class="container text-center">
+        <p class="section-label mb-2" style="color: var(--color-accent-gold);">Get in touch</p>
+        <h1 class="mb-3">We'd love to hear from you</h1>
+        <p class="lead-text mx-auto" style="text-align: center;">
+            Questions about a project, a technical issue, or just want to say hi? Drop us a message.
+        </p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container" style="max-width: 640px;">
+        <form method="post">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="auth-error-text">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="auth-submit-btn">Send Message</button>
+        </form>
+
+        <div class="row mt-5 g-4 text-center">
+            <div class="col-md-4">
+                <i class="bi bi-envelope-fill" style="font-size: 1.6rem; color: var(--color-accent-gold);"></i>
+                <p class="mt-2 mb-0" style="font-weight: 600;">Email</p>
+                <p style="color: #888; font-size: 0.85rem;">support@egycrowd.com</p>
+            </div>
+            <div class="col-md-4">
+                <i class="bi bi-telephone-fill" style="font-size: 1.6rem; color: var(--color-accent-gold);"></i>
+                <p class="mt-2 mb-0" style="font-weight: 600;">Phone</p>
+                <p style="color: #888; font-size: 0.85rem;">+20 100 000 0000</p>
+            </div>
+            <div class="col-md-4">
+                <i class="bi bi-geo-alt-fill" style="font-size: 1.6rem; color: var(--color-accent-gold);"></i>
+                <p class="mt-2 mb-0" style="font-weight: 600;">Location</p>
+                <p style="color: #888; font-size: 0.85rem;">Cairo, Egypt</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
