@@ -7,7 +7,7 @@ tailored for the Egyptian market.
 
 ---
 
-## ✨ Full Feature List
+##  Full Feature List
 
 ### Authentication & User Management
 - **Registration** with: first name, last name, email, password, password
@@ -151,7 +151,7 @@ tailored for the Egyptian market.
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 egycrowd/
@@ -178,12 +178,12 @@ egycrowd/
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### 1. Clone and set up the environment
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/fatma-shehata/Egyptian-crowdfunding-web-platform.git
 cd egycrowd
 python -m venv venv
 venv\Scripts\activate        # Windows
@@ -217,7 +217,7 @@ projects as featured.
 
 ---
 
-## 📧 Email (development mode)
+##  Email (development mode)
 
 Activation, password-reset, and contact-confirmation emails are printed to
 the console during development (`EMAIL_BACKEND = console`). A real SMTP
@@ -225,13 +225,13 @@ provider should replace this before any production deployment.
 
 ---
 
-## ✅ Currently in progress
+##  Currently in progress
 
 - Facebook Login
 - Twitter/X Login
 - Arabic / RTL support
 
-## 🔜 Possible next steps
+##  Possible next steps
 
 - Migrate from SQLite to PostgreSQL for production
 - Real payment gateway integration (currently a simulated/sandbox flow)
@@ -242,15 +242,15 @@ provider should replace this before any production deployment.
 
 ---
 
-## 👥 Team
+##  Team
 
 Built as a graduation/competition project by:
-- **[Fatma Shehtat Ewas]**
-- **[Mohamed Ebrahim Salem]**
-- **[Abdelrahman Hassany Abdlelmaged Qenawy]**
+- **Fatma Shehtat Ewas**
+- **Mohamed Ebrahim Salem**
+- **Abdelrahman Hassany Abdlelmaged Qenawy**
 
 ---
 
-## 📄 License
+##  License
 
 This project was built for educational purposes.
