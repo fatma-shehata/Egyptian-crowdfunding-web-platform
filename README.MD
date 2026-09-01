@@ -183,7 +183,7 @@ egycrowd/
 ### 1. Clone and set up the environment
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/fatma-shehata/Egyptian-crowdfunding-web-platform.git
 cd egycrowd
 python -m venv venv
 venv\Scripts\activate        # Windows
