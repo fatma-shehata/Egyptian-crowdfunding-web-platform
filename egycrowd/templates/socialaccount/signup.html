@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Complete Your Profile — EgyCrowd{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container" style="max-width: 460px;">
+        <p class="section-label mb-1">Almost there</p>
+        <h2 class="mb-2">Complete your profile</h2>
+        <p style="color: #888; margin-bottom: 24px;">
+            We need a bit more information to finish setting up your EgyCrowd account.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="auth-error-text mb-3" style="background: #fdecea; padding: 12px 16px; border-radius: 10px;">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="auth-error-text">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="auth-submit-btn">Complete Sign Up</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

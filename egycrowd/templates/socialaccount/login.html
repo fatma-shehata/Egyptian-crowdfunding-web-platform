@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Sign in with {{ provider.name }} — EgyCrowd{% endblock %}
+
+{% block content %}
+<section style="min-height: 70vh; display: flex; align-items: center; justify-content: center;">
+    <div class="text-center" style="max-width: 420px; padding: 20px;">
+
+        {% if provider.id == "facebook" %}
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: #1877F2; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <i class="bi bi-facebook" style="font-size: 1.8rem; color: #fff;"></i>
+            </div>
+        {% elif provider.id == "twitter_oauth2" %}
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <i class="bi bi-twitter-x" style="font-size: 1.8rem; color: #fff;"></i>
+            </div>
+        {% else %}
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--color-bg-dark); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <i class="bi bi-shield-check" style="font-size: 1.8rem; color: var(--color-accent-gold);"></i>
+            </div>
+        {% endif %}
+
+        <h2 class="mb-3">Continue with {{ provider.name }}</h2>
+        <p style="color: #888; margin-bottom: 28px;">
+            You're about to sign in to EgyCrowd using your {{ provider.name }} account.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="auth-submit-btn">
+                Continue
+            </button>
+        </form>
+
+        <a href="{% url 'account_login' %}" class="d-block mt-3" style="color: #999; font-size: 0.85rem; text-decoration: none;">
+            &larr; Back to login
+        </a>
+    </div>
+</section>
+{% endblock %}

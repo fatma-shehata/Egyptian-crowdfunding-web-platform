@@ -12,9 +12,19 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 from pathlib import Path
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+from django.utils.translation import gettext_lazy as _
 
+LANGUAGE_CODE = 'en'
+LANGUAGES = [
+    ('en', _('English')),
+    ('ar', _('Arabic')),
+]
+LOCALE_PATHS = [BASE_DIR / 'locale']
+
+USE_I18N = True
 import os
 from dotenv import load_dotenv
 
@@ -45,7 +55,8 @@ INSTALLED_APPS = [
 
     'allauth',
     'allauth.account',
-
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.twitter_oauth2',
     'apps.accounts',
     'taggit',
     'apps.projects',
@@ -53,6 +64,7 @@ INSTALLED_APPS = [
     'apps.interactions',
     'apps.core',
     'apps.chatbot',
+    
 ]
 SITE_ID = 1
 
@@ -61,6 +73,7 @@ AUTH_USER_MODEL = 'accounts.User'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -196,3 +209,23 @@ ACCOUNT_FORMS = {
     'signup': 'apps.accounts.forms.CustomSignupForm',
 }
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+SOCIALACCOUNT_PROVIDERS = {
+    # 'facebook': {
+    #     'APP': {
+    #         'client_id': os.environ.get('FACEBOOK_APP_ID'),
+    #         'secret': os.environ.get('FACEBOOK_APP_SECRET'),
+    #         'key': ''
+    #     },
+    #     'METHOD': 'oauth2',
+    #     'SCOPE': ['email', 'public_profile'],
+    #     'FIELDS': ['id', 'first_name', 'last_name', 'email'],
+    # },
+
+    'twitter_oauth2': {
+        'APP': {
+            'client_id': os.environ.get('TWITTER_CLIENT_ID'),
+            'secret': os.environ.get('TWITTER_CLIENT_SECRET'),
+        }
+    }
+}

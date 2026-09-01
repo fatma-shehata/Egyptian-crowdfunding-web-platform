@@ -43,7 +43,9 @@
                 <div class="d-flex justify-content-end mb-2">
                     <a href="{% url 'account_reset_password' %}" style="font-size: 0.85rem; color: var(--color-accent-blue);">Forgot password?</a>
                 </div>
-
+                <a href="{% url 'twitter_oauth2_login' %}" class="btn-pill w-100 text-center d-block" style="background: #000; color: #fff; text-decoration: none; margin-bottom: 12px;">
+    <i class="bi bi-twitter-x"></i> Continue with Twitter
+</a>
                 <button type="submit" class="auth-submit-btn">Log In</button>
             </form>
 

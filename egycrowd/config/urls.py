@@ -29,6 +29,7 @@ urlpatterns = [
     path('donate/', include('apps.donations.urls')),
     path('interact/', include('apps.interactions.urls')),
     path('chatbot/', include('apps.chatbot.urls')),
+    path('i18n/', include('django.conf.urls.i18n')),
 ]
 
 if settings.DEBUG:
